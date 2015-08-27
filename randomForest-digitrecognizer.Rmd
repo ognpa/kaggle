@@ -1,0 +1,55 @@
+---
+title: "handwritting_r"
+author: "Priya Ananthram"
+date: "27 August 2015"
+output: html_document
+---
+
+
+
+```{r}
+
+digit=read.csv("train.csv")
+test2=read.csv("test.csv")
+train<-digit[0:30000,]
+test<-digit[30001:42000,]
+str(train)
+library(rpart)
+dtree = rpart(label ~ ., data=train, method="class")
+library(rpart.plot)
+library(RColorBrewer)
+predict = predict(dtree, newdata=test, type="class")
+mtx<-table(predict,test$label)
+sum(diag(mtx))/nrow(test)
+
+library(randomForest)
+randomForest = randomForest(as.factor(label) ~ ., data=train, nodesize=10, ntree=50, do.trace=TRUE)
+randomForestPredict = predict(randomForest, newdata=test)
+head(randomForestPredict)
+
+randomForestTable = table(test$label, randomForestPredict)
+randomForestTable
+sum(diag(randomForestTable))/nrow(test)
+randomForestPredict = predict(randomForest, newdata=test)
+head(randomForestPredict)
+randomForestTable = table(test$label, randomForestPredict)
+randomForestTable
+sum(diag(randomForestTable))/nrow(test)
+
+realTest = read.csv('test.csv')
+randomForestPredict = predict(randomForest, newdata=test2)
+str(test2)
+rowno<-seq(1,28000)
+df=data.frame(rowno,randomForestPredict)
+out = levels(randomForestPredict)[randomForestPredict] 
+
+write.csv(out, 'prediction.csv',row.names=TRUE)
+```
+
+You can also embed plots, for example:
+
+```{r, echo=FALSE}
+plot(cars)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
